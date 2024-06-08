@@ -1,5 +1,7 @@
 {
     "name": "hanaddi/pena",
+    "version": "1.0.0",
+    "license": "MIT",
     "type": "library",
     "autoload": {
         "psr-4": {
