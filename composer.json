@@ -1,12 +1,12 @@
 {
     "name": "hanaddi/pena",
-    "version": "1.0.1-alpha.2",
+    "description": "Writing document as an image using PHP GD.",
     "license": "MIT",
     "type": "library",
     "autoload": {
-        "psr-4": {
-            "Hanaddi\\": "src/"
-        }
+        "classmap": [
+            "src/"
+        ]
     },
     "require": {}
 }
