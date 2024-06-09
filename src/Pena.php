@@ -43,20 +43,6 @@ class Pena {
         }
         $height = $curry - $y + 2*$padding - $font_size*$lspace + $text_height;
 
-        // // draw background
-        // if (isset($options['bgcolor'])) {
-        //     $bgcolor = imagecolorallocate($im, ...$options['bgcolor']);
-        //     imagefilledrectangle(
-        //         $im, $x, $y, $x + $width - 1,
-        //         $y + $height,
-        //         $bgcolor
-        //     );
-        // }
-
-        // foreach ($boxes as $box) {
-        //     self::_drawinlinebox($im, $box);
-        // }
-
         return [
             'height' => $height,
             'boxes' => $boxes,
@@ -81,7 +67,7 @@ class Pena {
 
         // draw background
         if (isset($options['bgcolor'])) {
-            $bgcolor = imagecolorallocate($im, ...$options['bgcolor']);
+            $bgcolor = imagecolorallocatealpha($im, ...self::_colorarr($options['bgcolor']));
             imagefilledrectangle(
                 $im, $x, $y, $x + $width - 1,
                 $y + $height,
@@ -97,8 +83,9 @@ class Pena {
     }
 
     static function writetablerow($im, $x, $y, $width, $font_size, $font, $columns, $options=[]) {
-        $bordercolor = imagecolorallocate($im, ...($options['bordercolor'] ?? [0, 0, 0]));
+        $bordercolor = imagecolorallocatealpha($im, ...self::_colorarr($options['bordercolor'] ?? [0, 0, 0]));
 		$font = $options['font'] ?? $font;
+		$font_size = $options['fontsize'] ?? $font_size;
         $columnswidth = [];
         $columnsheight = [];
         $cells = [];
@@ -118,13 +105,14 @@ class Pena {
                 $coptions[$k] = $v;
             }
 			$cfont = $coptions['font'] ?? $font;
+			$cfont_size = $coptions['fontsize'] ?? $font_size;
 
             $cell = self::_getmultilinebox(
                 $im,
                 $x + $offx,
                 $y,
                 $cwidth,
-                $font_size,
+                $cfont_size,
                 $cfont,
                 $c['text'],
                 $coptions
@@ -143,8 +131,8 @@ class Pena {
             $cwidth = $columnswidth[$k]/$totalweight * $width;
             $_bgcolor = $c['options']['bgcolor'] ?? $options['bgcolor'] ?? false;
 
-            if ($_bgcolor !== false && $columnsheight[$k] < $maxheight) {
-                $bgcolor = imagecolorallocate($im, ...$_bgcolor);
+            if ($_bgcolor !== false) {
+                $bgcolor = imagecolorallocatealpha($im, ...self::_colorarr($_bgcolor));
                 imagefilledrectangle(
                     $im,
                     $x + $offx,
@@ -158,6 +146,8 @@ class Pena {
             $offx += $cwidth;
         }
 
+		// write text
+        // error_log(json_encode($cells, JSON_PRETTY_PRINT));
         foreach ($cells as $k => $cell) {
             $valign = $columns[$k]['options']['valign'] ?? $options['valign'] ?? 'top';
             $offy = 0;
@@ -174,8 +164,10 @@ class Pena {
                     foreach ($cell['boxes'][$k]['lines'][$l]['letterpool'] as $m => $letters) {
                         $cell['boxes'][$k]['lines'][$l]['letterpool'][$m]['y'] += $offy;
                     }
+					$cell['boxes'][$k]['options']['bgcolor'] = [0, 0, 0, 127];
                 }
             }
+			$cell['options']['bgcolor'] = [0, 0, 0, 127];
             self::_drawmultilinebox($im, $cell);
         }
 
@@ -203,7 +195,7 @@ class Pena {
 
         // draw background
         if (isset($options['bgcolor'])) {
-            $bgcolor = imagecolorallocate($im, ...$options['bgcolor']);
+            $bgcolor = imagecolorallocatealpha($im, ...self::_colorarr($options['bgcolor']));
             imagefilledrectangle($im, $x, $y, $x + $width - 1, $y + $config['height'] - 1, $bgcolor);
         }
 
@@ -221,7 +213,8 @@ class Pena {
         $bbox = imagettfbbox($font_size, 0, $font, "WMH");
         $text_height = $bbox[3] - $bbox[5];
 
-        $bbox_s = imagettfbbox(20, 0, $font, ' ');
+        // $bbox_s = imagettfbbox(20, 0, $font, ' ');
+        $bbox_s = imagettfbbox($font_size, 0, $font, ' ');
         $space = $bbox_s[2] - $bbox_s[0];
 
         $arr_text = explode(' ', $text);
@@ -279,7 +272,7 @@ class Pena {
 
         $maxheight = $iny - $font_size*$lspace + $text_height + 2*$padding;
         // error_log(json_encode($linepool, JSON_PRETTY_PRINT));
-        return [
+        $result = [
             'height' => $maxheight,
             'lines' => $linepool,
             'options' => $options,
@@ -289,8 +282,9 @@ class Pena {
             'y' => $y,
             'width' => $width,
         ];
+		// error_log(json_encode($result, JSON_PRETTY_PRINT));
 
-        return $maxheight;
+        return $result;
     }
 
     static function _drawinlinebox($im, $config) {
@@ -305,7 +299,7 @@ class Pena {
         $padding = $options['padding'] ?? 0;
         $align = $options['align'] ?? 'left';
         $lspace = ($options['lspace'] ?? 1) + 0.5;
-        $color = imagecolorallocate($im, ...($options['color'] ?? [0, 0, 0]));
+        $color = imagecolorallocatealpha($im, ...self::_colorarr($options['color'] ?? [0, 0, 0]));
         $maxwidth = $width - 2*$padding; // max text width
 
 
@@ -334,6 +328,16 @@ class Pena {
                     'y' => $line['letterpool'][0]['y'],
                 ]];
             }
+			
+			// For debugging purpose
+            // imagerectangle(
+            //     $im,
+            //     $x + $morex,
+            //     $line['letterpool'][0]['y'] - 10,
+            //     $x + $morex + $line['width'],
+            //     $line['letterpool'][0]['y'] + 1,
+            //     $color
+            // );
 
             foreach ($line['letterpool'] as $i => $letter) {
                 imagefttext(
@@ -349,4 +353,14 @@ class Pena {
             }
         }
     }
+
+	static function _colorarr($c) {
+		$default = [0, 0, 0, 0];
+		foreach ($default as $i => $v) {
+			if (isset($c[$i])) {
+				$default[$i] = $c[$i];
+			}
+		}
+		return $default;
+	}
 }
