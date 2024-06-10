@@ -1,5 +1,6 @@
 <?php
 namespace Hanaddi;
+use Hanaddi\Pena\Table;
 
 class Pena {
 
@@ -362,5 +363,9 @@ class Pena {
 			}
 		}
 		return $default;
+	}
+
+	static function table($im, $conf=[]) {
+		return new Table($im, $conf);
 	}
 }

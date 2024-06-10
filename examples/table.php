@@ -11,9 +11,9 @@ $margin  = 40;
 $padding = 10;
 $pointy  = $margin;
 $font_size = 10;
-$font      = __DIR__ . '/fonts/Roboto/Roboto-Regular.ttf';
-$font_bold = __DIR__ . '/fonts/Roboto/Roboto-Black.ttf';
-$font_thin = __DIR__ . '/fonts/Roboto/Roboto-Thin.ttf';
+$font      = __DIR__ . '/../assets/fonts/Roboto/Roboto-Regular.ttf';
+$font_bold = __DIR__ . '/../assets/fonts/Roboto/Roboto-Black.ttf';
+$font_thin = __DIR__ . '/../assets/fonts/Roboto/Roboto-Thin.ttf';
 
 // Set the background to be white
 imagefilledrectangle($im, 0, 0, imagesx($im), imagesy($im), $white);

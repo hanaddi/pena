@@ -2,6 +2,8 @@
 
 ![GitHub Release](https://img.shields.io/github/v/release/hanaddi/pena?include_prereleases&display_name=tag)
 ![GitHub License](https://img.shields.io/github/license/hanaddi/pena)
+![PHP Version](https://img.shields.io/packagist/dependency-v/hanaddi/pena/php)
+
 
 Writing document as an image using PHP GD.
 

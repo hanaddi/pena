@@ -1,6 +1,12 @@
 {
     "name": "hanaddi/pena",
     "description": "Writing document as an image using PHP GD.",
+    "keywords": [
+        "php",
+        "document",
+        "text",
+        "gd"
+    ],
     "license": "MIT",
     "type": "library",
     "autoload": {
@@ -8,5 +14,8 @@
             "src/"
         ]
     },
-    "require": {}
+    "require": {
+        "php": ">=5.3.0",
+        "ext-gd": "*"
+    }
 }

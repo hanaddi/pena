@@ -8,9 +8,9 @@ $white  = imagecolorallocate($im, 255, 255, 255);
 $margin  = 40;
 $padding = 10;
 $font_size = 12;
-$font      = __DIR__ . '/fonts/Roboto/Roboto-Regular.ttf';
-$font_bold = __DIR__ . '/fonts/Roboto/Roboto-Black.ttf';
-$font_thin = __DIR__ . '/fonts/Roboto/Roboto-Thin.ttf';
+$font      = __DIR__ . '/../assets/fonts/Roboto/Roboto-Regular.ttf';
+$font_bold = __DIR__ . '/../assets/fonts/Roboto/Roboto-Black.ttf';
+$font_thin = __DIR__ . '/../assets/fonts/Roboto/Roboto-Thin.ttf';
 $width  = imagesx($im) - 2*$margin;
 $pointy = $margin;
 
@@ -205,7 +205,7 @@ $pointy += Pena::writeinlinebox(
     ]
 );
 
-$pointy += $font_size * 2;
+$pointy += $font_size * 3;
 $pointy += Pena::writeinlinebox(
     $im, $margin, $pointy, $width, $font_size, $font,
     "January 20, 2024",
@@ -228,3 +228,9 @@ $pointy += Pena::writeinlinebox(
 header('Content-Type: image/png');
 imagepng($im);
 imagedestroy($im);
+
+// ob_start();
+// imagepng($im);
+// $image_data = ob_get_clean();
+// echo '<img src="data:image/png;base64, ' . base64_encode($image_data) . '">';
+// imagedestroy($im);
