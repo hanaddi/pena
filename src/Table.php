@@ -85,10 +85,16 @@ class Table {
         return $this;
     }
 
+    public function getHeight() {
+        return array_sum($this->rowminheight);
+    }
+
     public function draw() {
         $this->_drawbackground();
         $this->_drawtext();
         $this->_drawborder();
+
+        return $this;
     }
 
     public function _drawbackground() {

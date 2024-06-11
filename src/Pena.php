@@ -3,7 +3,62 @@ namespace Hanaddi;
 use Hanaddi\Pena\Table;
 
 class Pena {
+    public $document;
+    public $docwidth;
+    public $docheight;
+    public $cursor = [0, 0];
+    public $config = [
+        'font'      => __DIR__ . '/../assets/fonts/Roboto/Roboto-Regular.ttf',
+        'fontsize'  => 12,
+        'margin'    => 0,
+    ];
+    public $writelastoptions = [];
 
+    public function __construct($size, $config=[]) {
+        // init config
+        foreach ($config as $key => $value) {
+            $this->config[$key] = $value;
+        }
+        $this->cursor = [$this->config['margin'], $this->config['margin']];
+
+        // init image
+        $this->docwidth = $size[0];
+        $this->docheight = $size[1];
+        $this->document = imagecreatetruecolor($this->docwidth, $this->docheight);
+        $white  = imagecolorallocate($this->document, 255, 255, 255);
+        imagefilledrectangle(
+            $this->document, 0, 0,
+            $this->docwidth, $this->docheight,
+            $white
+        );
+    }
+
+    public function write($text, $options=[]) {
+        $writeoptions = [
+            'width' => $this->docwidth - 2 * $this->config['margin'],
+        ];
+        foreach ($options as $key => $value) {
+            $writeoptions[$key] = $value;
+        }
+        $this->writelastoptions = $writeoptions;
+
+        $height = self::writemultilinebox(
+            $this->document,
+            $this->cursor[0], $this->cursor[1],
+            $writeoptions['width'], $this->config['fontsize'], $this->config['font'], $text, $writeoptions
+        );
+        $this->cursor[1] += $height;
+
+        return $this;
+    }
+
+    public function lineSpace() {
+        $lspace = ($writeoptions['lspace'] ?? 1) + 0.5;
+        $this->cursor[1] += ($lspace - 1) * $this->config['fontsize'];
+        return $this;
+    }
+
+    // STATICS
     static function __foo() {
         return "__bar";
     }

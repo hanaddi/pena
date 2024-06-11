@@ -18,7 +18,40 @@ composer require hanaddi/pena
 
 ## Example
 
-Writing a table\:
+### Writing simple paragraphs\:
+
+```php
+use Hanaddi\Pena;
+
+$doc = new Pena(
+    [400, 300],
+    [
+        'margin' => 10,
+    ]
+);
+
+$text = "eget nulla facilisi etiam dignissim diam quis enim lobortis scelerisque fermentum dui faucibus in ornare "
+      . "quam viverra orci sagittis eu volutpat odio facilisis mauris sit amet massa vitae tortor condimentum";
+
+$doc->write($text, ["align" => "center", "lspace" => 1.5])
+    ->lineSpace()
+    ->write($text, ["color" => [255, 0, 0], "lspace" => 1.5])
+    ->lineSpace()
+    ->write($text, ["align" => "justify", "lspace" => 1.5, "bgcolor" => [0, 255, 255]]);
+
+// Output as image
+header('Content-Type: image/png');
+imagepng($doc->document);
+imagedestroy($doc->document);
+```
+
+Result\:
+
+<p align="left">
+    <img alt="Example table" width="400" src="https://raw.githubusercontent.com/hanaddi/pena/main/examples/images/paragraph-sample.png">
+</p>
+
+### Writing a table\:
 
 ```php
 use Hanaddi\Pena;
@@ -59,5 +92,5 @@ imagedestroy($image);
 Result\:
 
 <p align="left">
-    <img alt="Example table" width="200" src="https://raw.githubusercontent.com/hanaddi/pena/main/examples/images/table-simple.png">
+    <img alt="Example table" width="300" src="https://raw.githubusercontent.com/hanaddi/pena/main/examples/images/table-simple.png">
 </p>
