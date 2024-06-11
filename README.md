@@ -51,7 +51,7 @@ Result\:
     <img alt="Example table" width="400" src="https://raw.githubusercontent.com/hanaddi/pena/main/examples/images/paragraph-sample.png" style="border: 1px solid black">
 </p>
 
-### Writing a table\:
+### Make a table\:
 
 ```php
 use Hanaddi\Pena;

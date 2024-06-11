@@ -336,9 +336,9 @@ class Pena {
         $bbox = imagettfbbox($font_size, 0, $font, "WMH");
         $text_height = $bbox[3] - $bbox[5];
 
-        // $bbox_s = imagettfbbox(20, 0, $font, ' ');
         $bbox_s = imagettfbbox($font_size, 0, $font, ' ');
-        $space = $bbox_s[2] - $bbox_s[0];
+        // add more space to handle sentece with many spaces
+        $space = ($bbox_s[2] - $bbox_s[0]) * 1.5;
 
         $arr_text = explode(' ', $text);
         $inx = 0;
@@ -350,15 +350,30 @@ class Pena {
         foreach ($arr_text as $t) {
             $t_box = imagettfbbox($font_size, 0, $font, $t);
             if ($inx - $t_box[0] + $t_box[2] >= $maxwidth) {
-                $inx = 0;
-                $iny += $font_size * $lspace;
-                $currwidth -= $space;
-                $linepool[] = [
-                    'width' => $currwidth,
-                    'letterpool' => $letterpool,
-                ];
-                $currwidth = 0;
-                $letterpool = [];
+                $proceed = true;
+
+                // recalculate length
+                if (in_array($align, ['left', 'right', 'center'])) {
+                    $fulltext = implode(" ", array_column($letterpool, "text"));
+                    $ft_box = imagettfbbox($font_size, 0, $font, $fulltext);
+                    if ($inx - $ft_box[0] + $ft_box[2] < $maxwidth) {
+                        $proceed = false;
+                    } else {
+                        $currwidth = $ft_box[2] - $ft_box[0] + $space;
+                    }
+                }
+
+                if ($proceed) {
+                    $inx = 0;
+                    $iny += $font_size * $lspace;
+                    $currwidth -= $space;
+                    $linepool[] = [
+                        'width' => $currwidth,
+                        'letterpool' => $letterpool,
+                    ];
+                    $currwidth = 0;
+                    $letterpool = [];
+                }
             }
 
             $letterpool[] = [
@@ -378,6 +393,8 @@ class Pena {
             // keep the original space for the last row
             $t = array_column($letterpool, 'text');
             $t = implode(' ', $t);
+            $ft_box = imagettfbbox($font_size, 0, $font, $t);
+            $currwidth = $ft_box[2] - $ft_box[0];
             $letterpool = [[
                 'text' => $t,
                 'x' => $letterpool[0]['x'],
@@ -452,14 +469,14 @@ class Pena {
                 ]];
             }
 			
-			// For debugging purpose
+			// // For debugging purpose
             // imagerectangle(
             //     $im,
             //     $x + $morex,
             //     $line['letterpool'][0]['y'] - 10,
             //     $x + $morex + $line['width'],
             //     $line['letterpool'][0]['y'] + 1,
-            //     $color
+            //     imagecolorallocate($im, 200, 0, 0)
             // );
 
             foreach ($line['letterpool'] as $i => $letter) {
