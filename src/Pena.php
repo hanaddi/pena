@@ -6,7 +6,10 @@ class Pena {
     public $document;
     public $docwidth;
     public $docheight;
+    public $tab = 0;
+    public $table = null;
     public $cursor = [0, 0];
+    public $cursory = [];
     public $config = [
         'font'      => __DIR__ . '/../assets/fonts/Roboto/Roboto-Regular.ttf',
         'fontsize'  => 12,
@@ -45,16 +48,80 @@ class Pena {
         $height = self::writemultilinebox(
             $this->document,
             $this->cursor[0], $this->cursor[1],
-            $writeoptions['width'], $this->config['fontsize'], $this->config['font'], $text, $writeoptions
+            $writeoptions['width'],
+            $writeoptions['fontsize'] ?? $this->config['fontsize'],
+            $writeoptions['font'] ?? $this->config['font'],
+            $text, $writeoptions
         );
-        $this->cursor[1] += $height;
+        $this->cursorDown($height);
 
         return $this;
     }
 
     public function lineSpace() {
         $lspace = ($writeoptions['lspace'] ?? 1) + 0.5;
-        $this->cursor[1] += ($lspace - 1) * $this->config['fontsize'];
+        $this->cursorDown(($lspace - 1) * $this->config['fontsize']);
+        return $this;
+    }
+
+    public function tab($tab) {
+        $this->tab = $tab;
+        $this->cursor[0] += $tab;
+        return $this;
+    }
+
+    public function tabReset() {
+        $this->cursor[0] -= $this->tab;
+        $this->tab = 0;
+        return $this;
+    }
+
+    public function cursorDown($offset) {
+        $this->cursory[] = $offset;
+        $this->cursor[1] += $offset;
+        return $this;
+    }
+
+    public function cursorBack() {
+        if (count($this->cursory) <= 0) {
+            return;
+        }
+        $this->cursor[1] -= array_pop($this->cursory);
+        return $this;
+    }
+
+    public function tableNew($options=[]) {
+        // TODO: add handle table is null
+
+        // set default options
+        $tableoptions = [
+            'width' => $this->docwidth - 2 * $this->config['margin'],
+            'fontsize' => $this->config['fontsize'],
+        ];
+        foreach ($options as $key => $value) {
+            $tableoptions[$key] = $value;
+        }
+
+        $this->table = new Table($this->document, $tableoptions);
+        
+        return $this;
+    }
+
+    public function tableRow($columns, $config=[]) {
+        // TODO: add handle table is null
+
+        $this->table->pushRow($columns, $config);
+        return $this;
+    }
+
+    public function tableDraw() {
+        // TODO: add handle table is null
+
+        $this->table->config['x'] = $this->cursor[0];
+        $this->table->config['y'] = $this->cursor[1];
+        $this->table->draw();
+        $this->cursorDown($this->table->getHeight());
+
         return $this;
     }
 

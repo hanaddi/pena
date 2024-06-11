@@ -48,7 +48,7 @@ imagedestroy($doc->document);
 Result\:
 
 <p align="left">
-    <img alt="Example table" width="400" src="https://raw.githubusercontent.com/hanaddi/pena/main/examples/images/paragraph-sample.png">
+    <img alt="Example table" width="400" src="https://raw.githubusercontent.com/hanaddi/pena/main/examples/images/paragraph-sample.png" style="border: 1px solid black">
 </p>
 
 ### Writing a table\:
@@ -92,5 +92,5 @@ imagedestroy($image);
 Result\:
 
 <p align="left">
-    <img alt="Example table" width="300" src="https://raw.githubusercontent.com/hanaddi/pena/main/examples/images/table-simple.png">
+    <img alt="Example table" width="300" src="https://raw.githubusercontent.com/hanaddi/pena/main/examples/images/table-simple.png" style="border: 1px solid black">
 </p>
