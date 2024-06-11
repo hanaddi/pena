@@ -56,37 +56,26 @@ Result\:
 ```php
 use Hanaddi\Pena;
 
-$image  = imagecreatetruecolor(300, 150);
-$white  = imagecolorallocate($image, 255, 255, 255);
-
-// Set the background to be white
-imagefilledrectangle($image, 0, 0, imagesx($image), imagesy($image), $white);
-
-// Write a table
-$table = Pena::table(
-        $image,
-        [
-            'x'         => 10,
-            'y'         => 10,
-            'width'     => 280,
-            'columns'   => 2,
-            'cellwidth' => [1, 3],
-            'padding'   => 10,
-        ]
-    )
-    ->pushRow(
+$doc = new Pena([300, 150], ['margin' => 10]);
+$doc->tableNew( [
+        'columns'   => 2,
+        'width'     => 280,
+        'cellwidth' => [1, 3],
+        'padding'   => 10,
+    ])
+    ->tableRow(
         [['text' => 'No.'], ['text' => 'Name']],
         ['bgcolor' => [250, 200, 0], 'align' => 'center']
     )
-    ->pushRow([['text' => '1.'], ['text' => 'Alpha']])
-    ->pushRow([['text' => '2.'], ['text' => 'Beta']])
-    ->pushRow([['text' => '3.'], ['text' => 'Charlie']])
-    ->draw();
+    ->tableRow([['text' => '1.'], ['text' => 'Alpha']])
+    ->tableRow([['text' => '2.'], ['text' => 'Beta']])
+    ->tableRow([['text' => '3.'], ['text' => 'Charlie']])
+    ->tableDraw();
 
 // Output as image
 header('Content-Type: image/png');
-imagepng($image);
-imagedestroy($image);
+imagepng($doc->document);
+imagedestroy($doc->document);
 ```
 
 Result\:
