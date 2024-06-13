@@ -7,6 +7,8 @@ class Table {
     public $rows;
     public $cellswidth   = [];
     public $rowminheight = [];
+    public $rowheight    = [];
+    public $blankcells   = [];
     public $config = [
         'font'      => __DIR__ . '/../assets/fonts/Roboto/Roboto-Regular.ttf',
         'fontsize'  => 12,
@@ -22,10 +24,10 @@ class Table {
         }
         $this->rows = [];
 
-        $this->_calcWidth();
+        $this->_calcwidth();
     }
 
-    protected function _calcWidth() {
+    protected function _calcwidth() {
         $cellswidth = [];
         $widthinit = array_fill(0, $this->config['columns'], 1);
         foreach ($this->config['cellwidth'] as $k => $v) {
@@ -39,26 +41,58 @@ class Table {
     }
 
     public function pushRow($columns, $options=[]) {
-        $font     = $options['font'] ?? $this->config['font'];
-        $fontsize = $options['fontsize'] ?? $this->config['fontsize'];
-        $width    = $this->config['width'];
+        $font      = $options['font'] ?? $this->config['font'];
+        $fontsize  = $options['fontsize'] ?? $this->config['fontsize'];
+        $width     = $this->config['width'];
         $minheight = $options['minheight'] ?? $this->config['minheight'] ?? 0;
-
+        $cellswidth = $this->cellswidth;
         
         $cells = [];
         $maxheight = 0;
         $offx = 0; // offset x
+        $rowcount = count($this->rows);
+        $blockpos = [
+            'row' => $rowcount,
+            'col' => 0,
+        ];
+        $this->blankcells[$rowcount] = $this->blankcells[$rowcount] ?? [];
+
         foreach ($columns as $k => $c) {
+            $colspan  = $c['options']['colspan'] ?? 1;
+
             // Calculate column width
-            $cwidth = $this->cellswidth[$k] ?? $width / count($this->config['columns']);
+            $cwidth = $cellswidth[$blockpos['col']] ?? $width / $this->config['columns'];
+            
+            // Handle rowspan
+            while ($this->blankcells[$rowcount][$blockpos['col']] ?? false) {
+                $cells[] = null;
+                $offx += $cwidth;
+                $blockpos['col']++;
+                $cwidth = $cellswidth[$blockpos['col']] ?? $width / $this->config['columns'];
+            }
+            
+            $cwidth_colspan = 0;
+            for ($i=1; $i<$colspan; $i++) {
+                $cwidth_colspan += $cellswidth[$blockpos['col'] + $i] ?? $width / $this->config['columns'];
+                $this->blankcells[$rowcount][$blockpos['col'] + $i] = true;
+            }
 
             // Generate options
             $coptions = $this->config;
-            foreach ($options as $k => $v) {
-                $coptions[$k] = $v;
+            foreach ($options as $i => $v) {
+                $coptions[$i] = $v;
             }
-            foreach (($c['options'] ?? []) as $k => $v) {
-                $coptions[$k] = $v;
+            foreach (($c['options'] ?? []) as $i => $v) {
+                $coptions[$i] = $v;
+            }
+            
+            $rowspan = $coptions['rowspan'] ?? 1;
+            for ($i=1; $i<$rowspan; $i++) { 
+                $iy = $rowcount + $i;
+                $this->blankcells[$iy] = $this->blankcells[$iy] ?? [];
+                for ($j=0; $j<$colspan; $j++) {
+                    $this->blankcells[$iy][$blockpos['col'] + $j] = true;
+                }
             }
 
 			$cfont      = $coptions['font'] ?? $font;
@@ -69,7 +103,7 @@ class Table {
                 $this->image,
                 $offx,
                 0,
-                $cwidth,
+                $cwidth + $cwidth_colspan,
                 $cfontsize,
                 $cfont,
                 $c['text'],
@@ -79,6 +113,7 @@ class Table {
             $maxheight = max($maxheight, $cell['height'], $cminheight);
             $cells[] = $cell;
             $offx += $cwidth;
+            $blockpos['col']++;
         }
         $this->rows[] = $cells;
         $this->rowminheight[] = $maxheight;
@@ -90,6 +125,7 @@ class Table {
     }
 
     public function draw() {
+        $this->_getrowheight();
         $this->_drawbackground();
         $this->_drawtext();
         $this->_drawborder();
@@ -97,13 +133,29 @@ class Table {
         return $this;
     }
 
+    public function _getrowheight() {
+        $this->rowheight = [];
+        foreach ($this->rows as $idrow => $columns) {
+            $this->rowheight[] = max(-1, $this->rowminheight[$idrow] ?? 0, ...array_column($columns, "height"));
+        }
+    }
+
     public function _drawbackground() {
         $offy = 0;
         foreach ($this->rows as $idrow => $columns) {
             $offx = 0;
-            $maxheight = max($this->rowminheight[$idrow] ?? 0, ...array_column($columns, "height"));
+            $maxheight = $this->rowheight[$idrow];
             foreach ($columns as $idcol => $column) {
+                if ($column === null) continue;
                 $_bgcolor = $column['options']['bgcolor'] ?? $this->config['bgcolor'] ?? false;
+                
+                $rowspan    = $column['options']['rowspan'] ?? 1;
+                $moreheight = 0;
+                for ($i=1; $i < $rowspan; $i++) {
+                    $idx = intval($idrow) + $i;
+                    if (!isset($this->rowheight[$idx])) break;
+                    $moreheight += $this->rowheight[$idx];
+                }
                 
                 if ($_bgcolor !== false) {
                     $bgcolor = imagecolorallocatealpha($this->image, ...Pena::_colorarr($_bgcolor));
@@ -112,7 +164,7 @@ class Table {
                         $this->config['x'] + $column['x'] + $offx,
                         $this->config['y'] + $column['y'] + $offy,
                         $this->config['x'] + $column['x'] + $offx + $column['width'],
-                        $this->config['y'] + $column['y'] + $offy + $maxheight,
+                        $this->config['y'] + $column['y'] + $offy + $maxheight + $moreheight,
                         $bgcolor
                     );
                 }
@@ -125,17 +177,27 @@ class Table {
         $offy = 0;
         foreach ($this->rows as $idrow => $columns) {
             $offx = 0;
-            $maxheight = max($this->rowminheight[$idrow] ?? 0, ...array_column($columns, "height"));
+            $maxheight = $this->rowheight[$idrow];
             foreach ($columns as $idcol => $column) {
+                if ($column === null) continue;
                 $_bdcolor = $column['options']['bordercolor'] ?? $this->config['bordercolor'] ?? [0, 0, 0];
-                $bgcolor = imagecolorallocatealpha($this->image, ...Pena::_colorarr($_bdcolor));
+                $bdcolor = imagecolorallocatealpha($this->image, ...Pena::_colorarr($_bdcolor));
+                
+                $rowspan    = $column['options']['rowspan'] ?? 1;
+                $moreheight = 0;
+                for ($i=1; $i < $rowspan; $i++) {
+                    $idx = intval($idrow) + $i;
+                    if (!isset($this->rowheight[$idx])) break;
+                    $moreheight += $this->rowheight[$idx];
+                }
+
                 imagerectangle(
                     $this->image,
                     $this->config['x'] + $column['x'] + $offx,
                     $this->config['y'] + $column['y'] + $offy,
                     $this->config['x'] + $column['x'] + $offx + $column['width'],
-                    $this->config['y'] + $column['y'] + $offy + $maxheight,
-                    $bgcolor
+                    $this->config['y'] + $column['y'] + $offy + $maxheight + $moreheight,
+                    $bdcolor
                 );
             }
             $offy += $maxheight;
@@ -146,17 +208,26 @@ class Table {
         $offy = $this->config['y'];
         foreach ($this->rows as $idrow => $columns) {
             $offx = 0;
-            $maxheight = max($this->rowminheight[$idrow] ?? 0, ...array_column($columns, "height"));
+            $maxheight = $this->rowheight[$idrow];
             foreach ($columns as $idcol => $column) {
-                error_log(json_encode([$maxheight, $column['height']]));
+                if ($column === null) continue;
+                
+                $rowspan    = $column['options']['rowspan'] ?? 1;
+                $moreheight = 0;
+                for ($i=1; $i < $rowspan; $i++) {
+                    $idx = intval($idrow) + $i;
+                    if (!isset($this->rowheight[$idx])) break;
+                    $moreheight += $this->rowheight[$idx];
+                }
+
                 $valign = $column['options']['valign'] ?? $this->config['valign'] ?? 'top';
                 
                 $morey = 0;
                 if ($valign == 'bottom') {
-                    $morey = $maxheight - $column['height'];
+                    $morey = $maxheight - $column['height'] + $moreheight;
                 }
                 else if ($valign == 'middle') {
-                    $morey = ($maxheight - $column['height'])/2;
+                    $morey = ($maxheight - $column['height'] + $moreheight)/2;
                 }
                 $morey += $column['y'] + $offy;
                 $morex = $this->config['x'] + $column['x'] + $offx;
