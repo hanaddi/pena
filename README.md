@@ -1,6 +1,6 @@
 # hanaddi/pena
 
-![GitHub Release](https://img.shields.io/github/v/release/hanaddi/pena?include_prereleases&display_name=tag)
+[![GitHub Release](https://img.shields.io/github/v/release/hanaddi/pena?include_prereleases&display_name=tag)](https://packagist.org/packages/hanaddi/pena)
 ![GitHub License](https://img.shields.io/github/license/hanaddi/pena)
 ![PHP Version](https://img.shields.io/packagist/dependency-v/hanaddi/pena/php)
 
@@ -23,12 +23,7 @@ composer require hanaddi/pena
 ```php
 use Hanaddi\Pena;
 
-$doc = new Pena(
-    [400, 300],
-    [
-        'margin' => 10,
-    ]
-);
+$doc = new Pena([400, 300], ['margin' => 10]);
 
 $text = "eget nulla facilisi etiam dignissim diam quis enim lobortis scelerisque fermentum dui faucibus in ornare "
       . "quam viverra orci sagittis eu volutpat odio facilisis mauris sit amet massa vitae tortor condimentum";
