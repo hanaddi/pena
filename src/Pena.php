@@ -1,5 +1,7 @@
 <?php
 namespace Hanaddi;
+
+use Hanaddi\Pena\Exceptions\PenaException;
 use Hanaddi\Pena\Table;
 
 class Pena {
@@ -108,14 +110,20 @@ class Pena {
     }
 
     public function tableRow($columns, $config=[]) {
-        // TODO: add handle table is null
+        // Handle table not initialized yet
+        if ($this->table == null) {
+            throw new PenaException("Table is not initialized yet", 1);
+        }
 
         $this->table->pushRow($columns, $config);
         return $this;
     }
 
     public function tableDraw() {
-        // TODO: add handle table is null
+        // Handle table not initialized yet
+        if ($this->table == null) {
+            throw new PenaException("Table is not initialized yet", 1);
+        }
 
         $this->table->config['x'] = $this->cursor[0];
         $this->table->config['y'] = $this->cursor[1];

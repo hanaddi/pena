@@ -42,7 +42,7 @@ class Table {
     /**
      * Table rows data
      *
-     * @var array<array<float>>
+     * @var array<array<bool>>
      */
     public $blankcells   = [];
 
@@ -66,6 +66,8 @@ class Table {
      * @param array $config
      */
     public function __construct($image, $config=[]) {
+        Type::askTypes($image, ['resource']);
+
         $this->image = $image;
         foreach ($config as $key => $value) {
             $this->config[$key] = $value;
