@@ -3,12 +3,54 @@ namespace Hanaddi\Pena;
 use Hanaddi\Pena;
 
 class Table {
+
+    /**
+     * GdImage object
+     *
+     * @var GdImage
+     */
     public $image;
+
+    /**
+     * Table rows data
+     *
+     * @var array<array>
+     */
     public $rows;
-    public $cellswidth   = [];
+
+    /**
+     * Columns' width
+     *
+     * @var array<float>
+     */
+    public $cellswidth = [];
+
+    /**
+     * Array of row's minimum height
+     *
+     * @var array<float>
+     */
     public $rowminheight = [];
+
+    /**
+     * Array of row's height
+     *
+     * @var array<float>
+     */
     public $rowheight    = [];
+
+    /**
+     * Table rows data
+     *
+     * @var array<array<float>>
+     */
     public $blankcells   = [];
+
+    /**
+     * Table configuration
+     *
+     * @var array
+     */
     public $config = [
         'font'      => __DIR__ . '/../assets/fonts/Roboto/Roboto-Regular.ttf',
         'fontsize'  => 12,
@@ -17,6 +59,12 @@ class Table {
         'cellwidth' => [],
     ];
 
+    /**
+     * Constructor
+     *
+     * @param GdImage $image
+     * @param array $config
+     */
     public function __construct($image, $config=[]) {
         $this->image = $image;
         foreach ($config as $key => $value) {
@@ -27,6 +75,11 @@ class Table {
         $this->_calcwidth();
     }
 
+    /**
+     * Calculate columns width
+     *
+     * @return void
+     */
     protected function _calcwidth() {
         $cellswidth = [];
         $widthinit = array_fill(0, $this->config['columns'], 1);
@@ -40,6 +93,13 @@ class Table {
         $this->cellswidth = $cellswidth;
     }
 
+    /**
+     * Push row to table
+     *
+     * @param array $columns
+     * @param array $options
+     * @return Table
+     */
     public function pushRow($columns, $options=[]) {
         $font      = $options['font'] ?? $this->config['font'];
         $fontsize  = $options['fontsize'] ?? $this->config['fontsize'];
@@ -120,19 +180,34 @@ class Table {
         return $this;
     }
 
+    /**
+     * Get table height
+     *
+     * @return float
+     */
     public function getHeight() {
         return array_sum($this->rowminheight);
     }
 
+    /**
+     * Draw table
+     *
+     * @return Table
+     */
     public function draw() {
         $this->_getrowheight();
-        $this->_drawbackground();
-        $this->_drawtext();
-        $this->_drawborder();
+        $this->_rendertable([$this, '_frenderbackground']);
+        $this->_rendertable([$this, '_frendertext']);
+        $this->_rendertable([$this, '_frenderborder']);
 
         return $this;
     }
 
+    /**
+     * Calculate row height
+     *
+     * @return void
+     */
     public function _getrowheight() {
         $this->rowheight = [];
         foreach ($this->rows as $idrow => $columns) {
@@ -140,15 +215,19 @@ class Table {
         }
     }
 
-    public function _drawbackground() {
+    /**
+     * Render table
+     *
+     * @param callable $frender
+     * @return void
+     */
+    public function _rendertable($frender) {
         $offy = 0;
         foreach ($this->rows as $idrow => $columns) {
             $offx = 0;
             $maxheight = $this->rowheight[$idrow];
             foreach ($columns as $idcol => $column) {
                 if ($column === null) continue;
-                $_bgcolor = $column['options']['bgcolor'] ?? $this->config['bgcolor'] ?? false;
-                
                 $rowspan    = $column['options']['rowspan'] ?? 1;
                 $moreheight = 0;
                 for ($i=1; $i < $rowspan; $i++) {
@@ -156,99 +235,96 @@ class Table {
                     if (!isset($this->rowheight[$idx])) break;
                     $moreheight += $this->rowheight[$idx];
                 }
+
+                $frender([
+                    'image'   => $this->image,
+                    'column'  => $column,
+                    'config'  => $this->config,
+                    'offsetx' => $offx,
+                    'offsety' => $offy,
+                    'height'  => $maxheight + $moreheight,
+                ]);
                 
-                if ($_bgcolor !== false) {
-                    $bgcolor = imagecolorallocatealpha($this->image, ...Pena::_colorarr($_bgcolor));
-                    imagefilledrectangle(
-                        $this->image,
-                        $this->config['x'] + $column['x'] + $offx,
-                        $this->config['y'] + $column['y'] + $offy,
-                        $this->config['x'] + $column['x'] + $offx + $column['width'],
-                        $this->config['y'] + $column['y'] + $offy + $maxheight + $moreheight,
-                        $bgcolor
-                    );
-                }
             }
             $offy += $maxheight;
         }
     }
 
-    public function _drawborder() {
-        $offy = 0;
-        foreach ($this->rows as $idrow => $columns) {
-            $offx = 0;
-            $maxheight = $this->rowheight[$idrow];
-            foreach ($columns as $idcol => $column) {
-                if ($column === null) continue;
-                $_bdcolor = $column['options']['bordercolor'] ?? $this->config['bordercolor'] ?? [0, 0, 0];
-                $bdcolor = imagecolorallocatealpha($this->image, ...Pena::_colorarr($_bdcolor));
-                
-                $rowspan    = $column['options']['rowspan'] ?? 1;
-                $moreheight = 0;
-                for ($i=1; $i < $rowspan; $i++) {
-                    $idx = intval($idrow) + $i;
-                    if (!isset($this->rowheight[$idx])) break;
-                    $moreheight += $this->rowheight[$idx];
-                }
-
-                imagerectangle(
-                    $this->image,
-                    $this->config['x'] + $column['x'] + $offx,
-                    $this->config['y'] + $column['y'] + $offy,
-                    $this->config['x'] + $column['x'] + $offx + $column['width'],
-                    $this->config['y'] + $column['y'] + $offy + $maxheight + $moreheight,
-                    $bdcolor
-                );
-            }
-            $offy += $maxheight;
-        }
+    /**
+     * Render background
+     *
+     * @param array $conf
+     * @return void
+     */
+    public function _frenderbackground($conf) {
+        $_bgcolor = $conf['column']['options']['bgcolor'] ?? $conf['config']['bgcolor'] ?? false;
+        if ($_bgcolor === false) return;
+        $bgcolor = imagecolorallocatealpha($this->image, ...Pena::_colorarr($_bgcolor));
+        imagefilledrectangle(
+            $conf['image'],
+            $conf['config']['x'] + $conf['column']['x'] + $conf['offsetx'],
+            $conf['config']['y'] + $conf['column']['y'] + $conf['offsety'],
+            $conf['config']['x'] + $conf['column']['x'] + $conf['offsetx'] + $conf['column']['width'],
+            $conf['config']['y'] + $conf['column']['y'] + $conf['offsety'] + $conf['height'],
+            $bgcolor
+        );
     }
 
-    public function _drawtext() {
-        $offy = $this->config['y'];
-        foreach ($this->rows as $idrow => $columns) {
-            $offx = 0;
-            $maxheight = $this->rowheight[$idrow];
-            foreach ($columns as $idcol => $column) {
-                if ($column === null) continue;
-                
-                $rowspan    = $column['options']['rowspan'] ?? 1;
-                $moreheight = 0;
-                for ($i=1; $i < $rowspan; $i++) {
-                    $idx = intval($idrow) + $i;
-                    if (!isset($this->rowheight[$idx])) break;
-                    $moreheight += $this->rowheight[$idx];
-                }
+    /**
+     * Render border
+     *
+     * @param array $conf
+     * @return void
+     */
+    public function _frenderborder($conf) {
+        $_bdcolor = $conf['column']['options']['bordercolor'] ?? $config['config']['bordercolor'] ?? [0, 0, 0];
+        $bdcolor = imagecolorallocatealpha($conf['image'], ...Pena::_colorarr($_bdcolor));
 
-                $valign = $column['options']['valign'] ?? $this->config['valign'] ?? 'top';
-                
-                $morey = 0;
-                if ($valign == 'bottom') {
-                    $morey = $maxheight - $column['height'] + $moreheight;
-                }
-                else if ($valign == 'middle') {
-                    $morey = ($maxheight - $column['height'] + $moreheight)/2;
-                }
-                $morey += $column['y'] + $offy;
-                $morex = $this->config['x'] + $column['x'] + $offx;
-                
-                $column['y'] += $morey;
-                $column['x'] += $morex;
-                foreach ($column['boxes'] as $k => $box) {
-                    foreach ($column['boxes'][$k]['lines'] as $l => $lines) {
-                        foreach ($column['boxes'][$k]['lines'][$l]['letterpool'] as $m => $letters) {
-                            $column['boxes'][$k]['lines'][$l]['letterpool'][$m]['y'] += $morey;
-                            $column['boxes'][$k]['lines'][$l]['letterpool'][$m]['x'] += $this->config['x'];
-                        }
-                        $column['boxes'][$k]['options']['bgcolor'] = [0, 0, 0, 127];
-                    }
-                }
-                $column['options']['bgcolor'] = [0, 0, 0, 127];
+        imagerectangle(
+            $conf['image'],
+            $conf['config']['x'] + $conf['column']['x'] + $conf['offsetx'],
+            $conf['config']['y'] + $conf['column']['y'] + $conf['offsety'],
+            $conf['config']['x'] + $conf['column']['x'] + $conf['offsetx'] + $conf['column']['width'],
+            $conf['config']['y'] + $conf['column']['y'] + $conf['offsety'] + $conf['height'],
+            $bdcolor
+        );
+    }
 
-                Pena::_drawmultilinebox($this->image, $column);
-                
-            }
-            $offy += $maxheight;
+    /**
+     * Render text
+     *
+     * @param array $conf
+     * @return void
+     */
+    public function _frendertext($conf) {
+        $column = $conf['column'];
+        $config = $conf['config'];
+
+        $valign = $column['options']['valign'] ?? $config['valign'] ?? 'top';
+
+        $morey = 0;
+        if ($valign == 'bottom') {
+            $morey = $conf['height'] - $column['height'];
         }
+        else if ($valign == 'middle') {
+            $morey = ($conf['height'] - $column['height'])/2;
+        }
+        $morey += $column['y'] + $conf['offsety'] + $config['y'];
+        $morex = $config['x'] + $column['x'] + $conf['offsetx'];
+        
+        $column['y'] += $morey;
+        $column['x'] += $morex;
+        foreach ($column['boxes'] as $k => $box) {
+            foreach ($column['boxes'][$k]['lines'] as $l => $lines) {
+                foreach ($column['boxes'][$k]['lines'][$l]['letterpool'] as $m => $letters) {
+                    $column['boxes'][$k]['lines'][$l]['letterpool'][$m]['y'] += $morey;
+                    $column['boxes'][$k]['lines'][$l]['letterpool'][$m]['x'] += $config['x'];
+                }
+                $column['boxes'][$k]['options']['bgcolor'] = [0, 0, 0, 127];
+            }
+        }
+        $column['options']['bgcolor'] = [0, 0, 0, 127];
+
+        Pena::_drawmultilinebox($conf['image'], $column);
     }
 }
