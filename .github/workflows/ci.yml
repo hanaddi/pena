@@ -50,7 +50,9 @@ jobs:
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
-          git checkout gh-pages origin/gh-pages
+          git fetch
+          git branch -r
+          git checkout --track origin/gh-pages
           git add html-coverage-*
           git commit -m "Upload coverage reports `date +'%Y-%m-%d %H:%M:%S'`"
           git push --force --set-upstream origin gh-pages
