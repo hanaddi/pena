@@ -58,6 +58,7 @@ jobs:
           git -C PAGE checkout --track origin/gh-pages
           cp -r html-coverage-* PAGE/
           git -C PAGE add html-coverage-*
+          ls -alF PAGE
           git -C PAGE commit -m "Upload coverage reports `date +'%Y-%m-%d %H:%M:%S'`"
           git -C PAGE push --force --set-upstream origin gh-pages
           rm $GITHUB_WORKSPACE/._pat_
