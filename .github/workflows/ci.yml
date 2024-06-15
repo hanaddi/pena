@@ -30,13 +30,13 @@ jobs:
         run: composer install
 
       - name: Run PHPUnit
-        run: ./vendor/bin/phpunit
+        run: ./vendor/bin/phpunit --coverage-html ./html-coverage-${{ matrix.php }}
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v2
         with:
           name: coverage-report-${{ matrix.php }}
-          path: html-coverage
+          path: html-coverage-${{ matrix.php }}
 
       # - name: Setup documentation
       #   if: success() && github.ref == 'refs/heads/main'
@@ -51,16 +51,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download all coverage reports
-        uses: actions/download-artifact@v2
-        with:
-          name: coverage-report-*
-          path: coverage-reports
+      # - name: Download all coverage reports
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: coverage-report-*
+      #     path: coverage-reports
 
       - name: Combine coverage reports
         run: |
           mkdir -p doc-pages
-          cp -r coverage-reports/coverage-report-* doc-pages/
+          cp -r html-coverage-* doc-pages/
 
       - name: Commit and push coverage reports to GitHub Pages
         run: |
