@@ -3,23 +3,77 @@ namespace Hanaddi;
 
 use Hanaddi\Pena\Exceptions\PenaException;
 use Hanaddi\Pena\Table;
+use Hanaddi\Pena\Type;
 
 class Pena {
+    /**
+     * The image document
+     *
+     * @var \GdImage
+     */
     public $document;
+
+    /**
+     * The document width
+     *
+     * @var float
+     */
     public $docwidth;
+
+    /**
+     * The document height
+     *
+     * @var float
+     */
     public $docheight;
+
+    /**
+     * Indentation for tab
+     * 
+     * @var float
+     */
     public $tab = 0;
+
+    /**
+     * The table object
+     *
+     * @var Table
+     */
     public $table = null;
+
+    /**
+     * The cursor position
+     *
+     * @var array<float>
+     */
     public $cursor = [0, 0];
+
+    /**
+     * Stack history of cursor y position
+     *
+     * @var array<float>
+     */
     public $cursory = [];
+
+    /**
+     * The default configuration for the document
+     *
+     * @var array
+     */
     public $config = [
         'font'      => __DIR__ . '/../assets/fonts/Roboto/Roboto-Regular.ttf',
         'fontsize'  => 12,
         'margin'    => 0,
     ];
+
+    /**
+     * The last write options
+     *
+     * @var array
+     */
     public $writelastoptions = [];
 
-    public function __construct($size, $config=[]) {
+    public function __construct($resource, $config=[]) {
         // init config
         foreach ($config as $key => $value) {
             $this->config[$key] = $value;
@@ -27,17 +81,63 @@ class Pena {
         $this->cursor = [$this->config['margin'], $this->config['margin']];
 
         // init image
-        $this->docwidth = $size[0];
-        $this->docheight = $size[1];
-        $this->document = imagecreatetruecolor($this->docwidth, $this->docheight);
+        $this->_initDoc($resource);
+    }
+
+    private function _initDoc($resource) {
+        if (Type::isTypes($resource, ['array']) && count($resource) >= 2) {
+            $this->docwidth = $resource[0];
+            $this->docheight = $resource[1];
+            $this->_createDoc($this->docwidth, $this->docheight);
+        }
+        else if (Type::isTypes($resource, ['resource'])) {
+            $this->document = $resource;
+            $this->docwidth = imagesx($this->document);
+            $this->docheight = imagesy($this->document);
+        }
+        else {
+            throw new PenaException("Invalid resource", 1);
+        }
+    }
+
+    // private function _getFont($font) {
+    //     if (!file_exists($font)) {
+    //         throw new PenaException("Font file not found", 1);
+    //     }
+    //     return $font;
+    // }
+
+    // private function _getFontSize($fontsize) {
+    //     if (!Type::isTypes($fontsize, ['integer'])) {
+    //         throw new PenaException("Invalid font size", 1);
+    //     }
+    //     return $fontsize;
+    // }
+
+    // private function _getColor($color) {
+    //     if (!Type::isTypes($color, ['array']) || count($color) < 3) {
+    //         throw new PenaException("Invalid color", 1);
+    //     }
+    //     return imagecolorallocatealpha($this->document, ...$color);
+    // }
+
+    private function _createDoc($width, $height) {
+        $this->document = imagecreatetruecolor($width, $height);
         $white  = imagecolorallocate($this->document, 255, 255, 255);
         imagefilledrectangle(
             $this->document, 0, 0,
-            $this->docwidth, $this->docheight,
+            $width, $height,
             $white
         );
     }
 
+    /**
+     * Write text to the document
+     *
+     * @param string $text The text to write
+     * @param array $options The options for the text
+     * @return Pena
+     */
     public function write($text, $options=[]) {
         $writeoptions = [
             'width' => $this->docwidth - 2 * $this->config['margin'],
