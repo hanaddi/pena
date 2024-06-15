@@ -37,3 +37,38 @@ jobs:
         with:
           name: coverage-report-${{ matrix.php }}
           path: html-coverage
+
+      # - name: Setup documentation
+      #   if: success() && github.ref == 'refs/heads/main'
+      #   run: |
+      #     mkdir -p doc-pages
+      #     echo "<h1>Documentation</h1>" > doc-pages/index.html
+
+  upload-coverage:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all coverage reports
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage-report-*
+          path: coverage-reports
+
+      - name: Combine coverage reports
+        run: |
+          mkdir -p doc-pages
+          cp -r coverage-reports/coverage-report-* doc-pages/
+
+      - name: Commit and push coverage reports to GitHub Pages
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git checkout --orphan gh-pages
+          git rm -rf .
+          cp -r doc-pages/* .
+          git add .
+          git commit -m "Upload coverage reports"
+          git push --force --set-upstream origin gh-pages

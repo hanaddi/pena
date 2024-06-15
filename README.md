@@ -3,6 +3,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/hanaddi/pena?include_prereleases&display_name=tag)](https://packagist.org/packages/hanaddi/pena)
 ![GitHub License](https://img.shields.io/github/license/hanaddi/pena)
 ![PHP Version](https://img.shields.io/packagist/dependency-v/hanaddi/pena/php)
+[![CI](https://github.com/hanaddi/pena/actions/workflows/ci.yml/badge.svg)](https://github.com/hanaddi/pena/actions/workflows/ci.yml)
 
 
 Simplify the process of writing document as an image using PHP GD.
