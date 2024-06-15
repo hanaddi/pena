@@ -53,8 +53,6 @@ jobs:
 
       - name: Download all coverage reports
         uses: actions/download-artifact@v4
-        with:
-          path: coverage-reports
 
       - name: List Files
         run: ls -R
@@ -62,7 +60,7 @@ jobs:
       - name: Combine coverage reports
         run: |
           mkdir -p doc-pages
-          cp -r coverage-reports/* doc-pages/
+          cp -r coverage-reports* doc-pages/
 
       # - name: Commit and push coverage reports to GitHub Pages
       #   run: |
