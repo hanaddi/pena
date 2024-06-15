@@ -25,7 +25,7 @@ class Type {
      */
     public static function askTypes($value, $types) {
         if (!self::isTypes($value, $types)) {
-            throw new TypeException("Invalid type");
+            throw new TypeException("Invalid type " . json_encode(gettype($value)) . " expected " . json_encode($types));
         }
     }
 
@@ -51,7 +51,7 @@ class Type {
     public static function askObjects($value, $objects) {
         self::askTypes($value, ['object']);
         if (!self::isObjects($value, $objects)) {
-            throw new TypeException("Invalid object");
+            throw new TypeException("Invalid object " . json_encode(gettype($value)) . " expected " . json_encode($objects));
         }
     }
 }

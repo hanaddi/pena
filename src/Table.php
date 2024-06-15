@@ -66,7 +66,8 @@ class Table {
      * @param array $config
      */
     public function __construct($image, $config=[]) {
-        Type::askTypes($image, ['resource']);
+        // The type is 'resource' prior to PHP 8.0.0, and 'object' as of PHP 8.0.0
+        Type::askTypes($image, ['resource', 'object']);
 
         $this->image = $image;
         foreach ($config as $key => $value) {
