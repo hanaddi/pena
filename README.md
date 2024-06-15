@@ -5,8 +5,7 @@
 ![PHP Version](https://img.shields.io/packagist/dependency-v/hanaddi/pena/php)
 
 
-Writing document as an image using PHP GD.
-
+Simplify the process of writing document as an image using PHP GD.
 
 ## Installation
 
