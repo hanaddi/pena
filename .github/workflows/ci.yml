@@ -50,7 +50,7 @@ jobs:
         run: |
           git config --global user.name 'Fat Han Nuraddin'
           git config --global user.email 'hanaddi@users.noreply.github.com'
-          git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}
+          git remote set-url origin https://hanaddi:${{ secrets.PAT }}@github.com/${{ github.repository }}
           git fetch
           git branch -r
           git checkout --track origin/gh-pages
