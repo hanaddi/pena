@@ -38,11 +38,13 @@ jobs:
           name: coverage-report-${{ matrix.php }}
           path: html-coverage-${{ matrix.php }}
 
-      # - name: Setup documentation
-      #   if: success() && github.ref == 'refs/heads/main'
-      #   run: |
-      #     mkdir -p doc-pages
-      #     echo "<h1>Documentation</h1>" > doc-pages/index.html
+      - name: Setup documentation
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p doc-pages
+          echo "<h1>Documentation</h1>" >> doc-pages/index.html
+          cat doc-pages/index.html
+          ls -alF
 
   upload-coverage:
     runs-on: ubuntu-latest
@@ -57,10 +59,10 @@ jobs:
       - name: List Files
         run: ls -R
 
-      - name: Combine coverage reports
-        run: |
-          mkdir -p doc-pages
-          cp -r coverage-reports* doc-pages/
+      # - name: Combine coverage reports
+      #   run: |
+      #     mkdir -p doc-pages
+      #     cp -r coverage-reports* doc-pages/
 
       # - name: Commit and push coverage reports to GitHub Pages
       #   run: |
