@@ -54,21 +54,23 @@ jobs:
       - name: Download all coverage reports
         uses: actions/download-artifact@v4
         with:
-          name: coverage-report-*
           path: coverage-reports
+
+      - name: List Files
+        run: ls -R
 
       - name: Combine coverage reports
         run: |
           mkdir -p doc-pages
           cp -r coverage-reports/* doc-pages/
 
-      - name: Commit and push coverage reports to GitHub Pages
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git checkout --orphan gh-pages
-          git rm -rf .
-          cp -r doc-pages/* .
-          git add .
-          git commit -m "Upload coverage reports"
-          git push --force --set-upstream origin gh-pages
+      # - name: Commit and push coverage reports to GitHub Pages
+      #   run: |
+      #     git config --global user.name 'github-actions'
+      #     git config --global user.email 'github-actions@github.com'
+      #     git checkout --orphan gh-pages
+      #     git rm -rf .
+      #     cp -r doc-pages/* .
+      #     git add .
+      #     git commit -m "Upload coverage reports"
+      #     git push --force --set-upstream origin gh-pages
