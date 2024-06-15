@@ -30,21 +30,22 @@ jobs:
         run: composer install
 
       - name: Run PHPUnit
-        run: ./vendor/bin/phpunit --coverage-html ./html-coverage-${{ matrix.php }}
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/doc-pages
+          ./vendor/bin/phpunit --coverage-html $GITHUB_WORKSPACE/doc-pages/html-coverage-${{ matrix.php }}
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v2
         with:
           name: coverage-report-${{ matrix.php }}
-          path: html-coverage-${{ matrix.php }}
+          path: $GITHUB_WORKSPACE/doc-pages/html-coverage-${{ matrix.php }}
 
       - name: Setup documentation
         if: success() && github.ref == 'refs/heads/main'
         run: |
-          mkdir -p doc-pages
-          echo "<h1>Documentation</h1>" >> doc-pages/index.html
-          cat doc-pages/index.html
-          ls -alF
+          echo "<h1>Documentation</h1>" >> $GITHUB_WORKSPACE/doc-pages/index.html
+          cat $GITHUB_WORKSPACE/doc-pages/index.html
+          ls -alF $GITHUB_WORKSPACE/doc-pages
 
   upload-coverage:
     runs-on: ubuntu-latest
@@ -57,7 +58,9 @@ jobs:
         uses: actions/download-artifact@v4
 
       - name: List Files
-        run: ls -R
+        run: |
+          ls -alF $GITHUB_WORKSPACE/doc-pages/
+          ls -R
 
       # - name: Combine coverage reports
       #   run: |
