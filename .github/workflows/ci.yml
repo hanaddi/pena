@@ -51,16 +51,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # - name: Download all coverage reports
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: coverage-report-*
-      #     path: coverage-reports
+      - name: Download all coverage reports
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report-*
+          path: coverage-reports
 
       - name: Combine coverage reports
         run: |
           mkdir -p doc-pages
-          cp -r html-coverage-* doc-pages/
+          cp -r coverage-reports/* doc-pages/
 
       - name: Commit and push coverage reports to GitHub Pages
         run: |
