@@ -50,13 +50,14 @@ jobs:
         run: |
           git config --global user.name 'Fat Han Nuraddin'
           git config --global user.email 'hanaddi@users.noreply.github.com'
-          git remote set-url origin https://hanaddi:${{ secrets.PAT }}@github.com/${{ github.repository }}
+          echo ${{ secrets.FULLURLPAT }} > $GITHUB_WORKSPACE/._pat_
           git fetch
           git branch -r
           git checkout --track origin/gh-pages
           git add html-coverage-*
           git commit -m "Upload coverage reports `date +'%Y-%m-%d %H:%M:%S'`"
           git push --force --set-upstream origin gh-pages
+          rm $GITHUB_WORKSPACE/._pat_
 
   upload-coverage:
     runs-on: ubuntu-latest
