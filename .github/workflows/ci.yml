@@ -52,12 +52,14 @@ jobs:
           git config --global user.email 'hanaddi@users.noreply.github.com'
           echo ${{ secrets.FULLURLPAT }} > $GITHUB_WORKSPACE/._pat_
           git config --global credential.helper "store --file $GITHUB_WORKSPACE/._pat_"
-          git fetch
-          git branch -r
-          git checkout --track origin/gh-pages
-          git add html-coverage-*
-          git commit -m "Upload coverage reports `date +'%Y-%m-%d %H:%M:%S'`"
-          git push --force --set-upstream origin gh-pages
+          git clone https://github.com/${{ github.repository }}.git PAGE
+          git -C PAGE fetch
+          git -C PAGE branch -r
+          git -C PAGE checkout --track origin/gh-pages
+          cp -r html-coverage-* PAGE/
+          git -C PAGE add html-coverage-*
+          git -C PAGE commit -m "Upload coverage reports `date +'%Y-%m-%d %H:%M:%S'`"
+          git -C PAGE push --force --set-upstream origin gh-pages
           rm $GITHUB_WORKSPACE/._pat_
 
   upload-coverage:
