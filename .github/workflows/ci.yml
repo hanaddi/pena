@@ -26,6 +26,21 @@ jobs:
           ini-values: post_max_size=256M, upload_max_filesize=256M
           coverage: xdebug
 
+      - name: Setup artifact folders
+        run: |
+            mkdir -p artifacts-${{ matrix.php }}
+
+      - name: Pull GitHub Pages
+        run: |
+          git config --global user.name 'Fat Han Nuraddin'
+          git config --global user.email 'hanaddi@users.noreply.github.com'
+          echo ${{ secrets.FULLURLPAT }} > $GITHUB_WORKSPACE/._pat_
+          git config --global credential.helper "store --file $GITHUB_WORKSPACE/._pat_"
+          git clone https://github.com/${{ github.repository }}.git PAGE
+          git -C PAGE fetch
+          git -C PAGE branch -r
+          git -C PAGE checkout --track origin/gh-pages
+
       - name: Install dependencies
         run: composer install
 
@@ -39,6 +54,12 @@ jobs:
           name: coverage-report-${{ matrix.php }}
           path: html-coverage-${{ matrix.php }}
 
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts-${{ matrix.php }}
+          path: artifacts-${{ matrix.php }}
+
       # - name: Setup documentation
       #   if: success() && github.ref == 'refs/heads/main'
       #   run: |
@@ -49,25 +70,20 @@ jobs:
       - name: Generate images
         run: |
           php genreports/coverage.php coverage-text
-
-      - name: Commit and push coverage reports to GitHub Pages
-        run: |
-          git config --global user.name 'Fat Han Nuraddin'
-          git config --global user.email 'hanaddi@users.noreply.github.com'
-          echo ${{ secrets.FULLURLPAT }} > $GITHUB_WORKSPACE/._pat_
-          git config --global credential.helper "store --file $GITHUB_WORKSPACE/._pat_"
-          git clone https://github.com/${{ github.repository }}.git PAGE
-          git -C PAGE fetch
-          git -C PAGE branch -r
-          git -C PAGE checkout --track origin/gh-pages
-          cp -r html-coverage-* PAGE/
-          cp README.* PAGE/
           cp coverage.png PAGE/
           cp coverage.png PAGE/coverage-${{ matrix.php }}.png
+
+      - name: Generate index
+        run: |
           mkdir -p PAGE/content-links
           echo "Coverage report for PHP ${{ matrix.php }}" > PAGE/content-links/html-coverage-${{ matrix.php }}
           echo "<h1>Pena</h1>" > PAGE/index.html
           php genreports/genindex.php PAGE/content-links >> PAGE/index.html
+
+      - name: Commit and push coverage reports to GitHub Pages
+        run: |
+          cp -r html-coverage-* PAGE/
+          cp README.* PAGE/
           git -C PAGE add .
           ls -alF PAGE
           git -C PAGE commit -m "Upload coverage reports `date +'%Y-%m-%d %H:%M:%S'`"

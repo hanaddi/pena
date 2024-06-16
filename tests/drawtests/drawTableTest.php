@@ -30,5 +30,10 @@ class DrawTableTest extends TestCase {
         
         $this->assertNotEmpty($actual);
         // $this->assertEquals($expected, $actual);
+        try {
+            file_put_contents(__DIR__ . '/../../artifacts/testDrawSimpleTable.json', json_encode($doc->table->rows, JSON_PRETTY_PRINT));
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+        }
     }
 }
