@@ -28,7 +28,7 @@ jobs:
 
       - name: Setup artifact folders
         run: |
-            mkdir -p artifacts-${{ matrix.php }}
+            mkdir -p artifacts
 
       - name: Pull GitHub Pages
         run: |
@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: artifacts-${{ matrix.php }}
-          path: artifacts-${{ matrix.php }}
+          path: artifacts
 
       # - name: Setup documentation
       #   if: success() && github.ref == 'refs/heads/main'
