@@ -72,6 +72,8 @@ jobs:
           php genreports/coverage.php coverage-text
           cp coverage.png PAGE/
           cp coverage.png PAGE/coverage-${{ matrix.php }}.png
+          cp coverage.svg PAGE/
+          cp coverage.svg PAGE/coverage-${{ matrix.php }}.svg
 
       - name: Generate index
         run: |

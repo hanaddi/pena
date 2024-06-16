@@ -5,4 +5,6 @@ test.php
 html-coverage/
 coverage-*
 coverage.png
+coverage.svg
 *-coverage
+artifacts/

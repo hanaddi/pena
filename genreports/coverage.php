@@ -44,3 +44,9 @@ $doc->tableNew( [
 // Output as image
 imagepng($doc->document, 'coverage.png');
 imagedestroy($doc->document);
+
+// SVG coverage badge
+$percent = (float) str_replace('%', '', $coverage);
+$color = $percent < 50 ? 'red' : ($percent < 80 ? 'orange' : 'green');
+$content = file_get_contents('https://img.shields.io/badge/coverage-' . urlencode($coverage) . '-' . $color);
+file_put_contents('coverage.svg', $content);
