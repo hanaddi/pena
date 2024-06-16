@@ -23,17 +23,22 @@ if (isset($matches[1])) {
     $coverage = 'N/A';
 }
 
-$doc = new Pena([150, 30], ['margin' => 0]);
+$doc = new Pena([140, 20], ['margin' => 0]);
 $doc->tableNew( [
         'columns'     => 2,
-        'fontsze'     => 12,
-        'padding'     => 5,
+        'cellwidth'   => [11, 10],
+        'fontsze'     => 8,
+        'padding'     => 0,
         'bordercolor' => [0, 0, 0, 127],
         'bgcolor'     => [250, 231, 157],
-        'minheight'   => 30,
+        'minheight'   => 20,
         'valign'      => 'middle',
+        'align'       => 'center',
     ])
-    ->tableRow([['text' => 'Coverage'], ['text' => $coverage, 'options'=>['bgcolor'=>[57, 231, 250], 'align'=>'center']]])
+    ->tableRow([
+        ['text' => 'Coverage', 'options'=>['bgcolor'=>[0x55, 0x55, 0x55], 'color'=>[255, 255, 255]]],
+        ['text' => $coverage, 'options'=>['bgcolor'=>[57, 231, 250]]]
+    ])
     ->tableDraw();
 
 // Output as image
