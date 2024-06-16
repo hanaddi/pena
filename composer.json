@@ -1,6 +1,6 @@
 {
     "name": "hanaddi/pena",
-    "description": "Writing document as an image using PHP GD.",
+    "description": "Simplify the process of writing document as an image using PHP GD.",
     "keywords": [
         "php",
         "document",
