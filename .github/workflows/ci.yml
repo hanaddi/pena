@@ -31,7 +31,7 @@ jobs:
 
       - name: Run PHPUnit
         run: |
-          ./vendor/bin/phpunit --coverage-html html-coverage-${{ matrix.php }}
+          ./vendor/bin/phpunit --coverage-html html-coverage-${{ matrix.php }} --coverage-text=coverage-text
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v2
@@ -46,6 +46,10 @@ jobs:
       #     cat $GITHUB_WORKSPACE/doc-pages/index.html
       #     ls -alF $GITHUB_WORKSPACE/doc-pages
 
+      - name: Generate images
+        run: |
+          php genreports/coverage.php coverage-text
+
       - name: Commit and push coverage reports to GitHub Pages
         run: |
           git config --global user.name 'Fat Han Nuraddin'
@@ -57,6 +61,8 @@ jobs:
           git -C PAGE branch -r
           git -C PAGE checkout --track origin/gh-pages
           cp -r html-coverage-* PAGE/
+          cp coverage.png PAGE/
+          cp coverage.png PAGE/coverage-${{ matrix.php }}.png
           git -C PAGE add html-coverage-*
           ls -alF PAGE
           git -C PAGE commit -m "Upload coverage reports `date +'%Y-%m-%d %H:%M:%S'`"
