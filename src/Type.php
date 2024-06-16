@@ -37,7 +37,8 @@ class Type {
      * @return bool Returns true if the value is one of the objects, false otherwise.
      */
     public static function isObjects($value, $objects) {
-        $object = gettype($value);
+        self::askTypes($value, ['object']);
+        $object = get_class($value);
         return in_array($object, $objects);
     }
 
@@ -49,9 +50,8 @@ class Type {
      * @return mixed|null The selected object from the array, or null if no matching object is found.
      */
     public static function askObjects($value, $objects) {
-        self::askTypes($value, ['object']);
         if (!self::isObjects($value, $objects)) {
-            throw new TypeException("Invalid object " . json_encode(gettype($value)) . " expected " . json_encode($objects));
+            throw new TypeException("Invalid object " . json_encode(get_class($value)) . " expected " . json_encode($objects));
         }
     }
 }

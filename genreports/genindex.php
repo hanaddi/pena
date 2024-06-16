@@ -12,7 +12,7 @@ $files = scandir($dir);
 echo "<ol>";
 foreach ($files as $file) {
     if ($file != '.' && $file != '..') {
-        $name = file_get_contents($file);
+        $name = file_get_contents(__DIR__ . '/../' . $argv[1] . '/' . $file);
         if (!$name) {
             $name = $file;
         }
