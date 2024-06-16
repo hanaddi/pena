@@ -82,6 +82,7 @@ jobs:
 
       - name: Commit and push coverage reports to GitHub Pages
         run: |
+          git -C PAGE pull
           cp -r html-coverage-* PAGE/
           cp README.* PAGE/
           git -C PAGE add .
