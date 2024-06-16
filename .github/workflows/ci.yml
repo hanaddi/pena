@@ -70,6 +70,7 @@ jobs:
       - name: Generate images
         run: |
           php genreports/coverage.php coverage-text
+          git -C PAGE pull
           cp coverage.png PAGE/
           cp coverage.png PAGE/coverage-${{ matrix.php }}.png
           cp coverage.svg PAGE/
