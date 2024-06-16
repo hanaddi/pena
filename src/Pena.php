@@ -161,8 +161,8 @@ class Pena {
     }
 
     public function lineSpace() {
-        $lspace = ($writeoptions['lspace'] ?? 1) + 0.5;
-        $this->cursorDown(($lspace - 1) * $this->config['fontsize']);
+        $lspace = ($this->writelastoptions['lspace'] ?? 1) + 0.5;
+        $this->cursorDown(($lspace- 1) * $this->config['fontsize']);
         return $this;
     }
 
