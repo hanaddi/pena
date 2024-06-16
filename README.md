@@ -4,8 +4,7 @@
 ![GitHub License](https://img.shields.io/github/license/hanaddi/pena)
 ![PHP Version](https://img.shields.io/packagist/dependency-v/hanaddi/pena/php)
 [![CI](https://github.com/hanaddi/pena/actions/workflows/ci.yml/badge.svg)](https://github.com/hanaddi/pena/actions/workflows/ci.yml)
-
-![Coverage](https://raw.githubusercontent.com/hanaddi/pena/gh-pages/coverage.png)
+![Coverage](https://raw.githubusercontent.com/hanaddi/pena/gh-pages/coverage.svg)
 
 
 Simplify the process of writing document as an image using PHP GD.
@@ -80,3 +79,9 @@ Result\:
 <p align="left">
     <img alt="Example table" width="300" src="https://raw.githubusercontent.com/hanaddi/pena/main/examples/images/table-simple.png" style="border: 1px solid black">
 </p>
+
+
+
+## Created with Pena
+
+![Coverage](https://raw.githubusercontent.com/hanaddi/pena/gh-pages/coverage.png)
