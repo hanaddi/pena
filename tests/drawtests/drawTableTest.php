@@ -27,7 +27,8 @@ class DrawTableTest extends TestCase {
         $image_data = ob_get_clean();
         $actual = base64_encode($image_data);
         imagedestroy($doc->document);
-
+        
+        $this->assertNotEmpty($actual);
         // $this->assertEquals($expected, $actual);
     }
 }
