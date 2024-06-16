@@ -27,7 +27,7 @@ $doc = new Pena([140, 20], ['margin' => 0]);
 $doc->tableNew( [
         'columns'     => 2,
         'cellwidth'   => [11, 10],
-        'fontsze'     => 8,
+        'fontsize'    => 12,
         'padding'     => 0,
         'bordercolor' => [0, 0, 0, 127],
         'bgcolor'     => [250, 231, 157],

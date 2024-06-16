@@ -64,38 +64,12 @@ jobs:
           cp README.* PAGE/
           cp coverage.png PAGE/
           cp coverage.png PAGE/coverage-${{ matrix.php }}.png
-          git -C PAGE add html-coverage-* coverage.png coverage-${{ matrix.php }}.png README.*
+          mkdir -p PAGE/content-links
+          echo "Coverage report for PHP ${{ matrix.php }}" > PAGE/content-links/html-coverage-${{ matrix.php }}
+          echo "<h1>Pena</h1>" > PAGE/index.html
+          php genreports/genindex.php PAGE/content-links >> PAGE/index.html
+          git -C PAGE add .
           ls -alF PAGE
           git -C PAGE commit -m "Upload coverage reports `date +'%Y-%m-%d %H:%M:%S'`"
           git -C PAGE push --force --set-upstream origin gh-pages
           rm $GITHUB_WORKSPACE/._pat_
-
-  upload-coverage:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download all coverage reports
-        uses: actions/download-artifact@v4
-
-      - name: List Files
-        run: |
-          ls -R
-
-      # - name: Combine coverage reports
-      #   run: |
-      #     mkdir -p doc-pages
-      #     cp -r coverage-reports* doc-pages/
-
-      # - name: Commit and push coverage reports to GitHub Pages
-      #   run: |
-      #     git config --global user.name 'github-actions'
-      #     git config --global user.email 'github-actions@github.com'
-      #     git checkout --orphan gh-pages
-      #     git rm -rf .
-      #     cp -r doc-pages/* .
-      #     git add .
-      #     git commit -m "Upload coverage reports"
-      #     git push --force --set-upstream origin gh-pages
