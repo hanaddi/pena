@@ -15,7 +15,7 @@ if (!file_exists($file_coverage)) {
 
 $coverage_contents = file_get_contents($file_coverage);
 
-preg_match('/Methods\:\s+([0-9]+(\.[0-9]+){0,1}\%)/', $coverage_contents, $matches);
+preg_match('/Lines\:\s+([0-9]+(\.[0-9]+){0,1}\%)/', $coverage_contents, $matches);
 
 if (isset($matches[1])) {
     $coverage = $matches[1];
