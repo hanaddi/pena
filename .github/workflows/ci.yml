@@ -61,9 +61,10 @@ jobs:
           git -C PAGE branch -r
           git -C PAGE checkout --track origin/gh-pages
           cp -r html-coverage-* PAGE/
+          cp README.* PAGE/
           cp coverage.png PAGE/
           cp coverage.png PAGE/coverage-${{ matrix.php }}.png
-          git -C PAGE add html-coverage-*
+          git -C PAGE add html-coverage-* coverage.png coverage-${{ matrix.php }}.png README.*
           ls -alF PAGE
           git -C PAGE commit -m "Upload coverage reports `date +'%Y-%m-%d %H:%M:%S'`"
           git -C PAGE push --force --set-upstream origin gh-pages
