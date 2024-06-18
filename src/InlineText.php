@@ -8,6 +8,9 @@ class InlineText extends Element {
     protected $config = [
         'font'     => __DIR__ . '/../assets/fonts/Roboto/Roboto-Regular.ttf',
         'fontsize' => 12,
+        'x'        => 0,
+        'y'        => 0,
+
     ];
     public $lineheight;
     protected $area;
@@ -24,46 +27,33 @@ class InlineText extends Element {
     }
 
     public function getBox() {
-        $font     = $this->config['font'];
-        $fontsize = $this->config['fontsize'];
-        $text     = $this->text;
-        $boundbox = imagettfbbox($fontsize, 0, $font, $text);
-
-        // Set x to 0
-        $boundbox[0] -= $boundbox[6];
-        $boundbox[2] -= $boundbox[6];
-        $boundbox[4] -= $boundbox[6];
-        $boundbox[6] = 0;
-
-        // Set y to 0
-        $boundbox[1] -= $boundbox[7];
-        $boundbox[3] -= $boundbox[7];
-        $boundbox[5] -= $boundbox[7];
-        $boundbox[7] = 0;
+        $boundbox = imagettfbbox($this->config['fontsize'], 0, $this->config['font'], $this->text);
 
         return [
-            'width'  => $boundbox[4],
-            'height' => $boundbox[1],
-            'x' => $boundbox[0],
-            'y' => $this->lineheight,
+            'textwidth'  => $boundbox[2] - $boundbox[0],
+            'ascheight'  => -$boundbox[7],
+            'descheight' => $boundbox[1],
+            'lineheight' => $this->lineheight,
         ];
     }
     
-    public function draw() {
+    public function draw($canvas=null) {
         $x = $this->config['x'] ?? 0;
         $y = $this->config['y'] ?? 0;
+        if ($canvas === null) {
+            $canvas = $this->canvas;
+        }
 
         $bbox = $this->area;
-        $x += $bbox['x'];
-        $y += $bbox['y'];
+        $y += $bbox['lineheight'];
 
         $font     = $this->config['font'];
         $fontsize = $this->config['fontsize'];
         $text     = $this->text;
         
-        $color = imagecolorallocatealpha($this->canvas, 0,0,0,0);
+        $color = imagecolorallocatealpha($canvas, 0,0,0,0);
         imagefttext(
-            $this->canvas, $fontsize, 0,
+            $canvas, $fontsize, 0,
             $x, $y, $color, $font, $text
         );
     }
