@@ -1,6 +1,8 @@
 <?php
 namespace Hanaddi\Pena\Bases;
 
+use Hanaddi\Pena\Type;
+
 class Element {
     public $canvas;
     protected $config = [];
@@ -24,7 +26,19 @@ class Element {
         $this->config['x'] = $x;
         $this->config['y'] = $y;
     }
-    
+
+    public function getColor($image, $color) {
+        $color = imagecolorallocatealpha($image, ...$this->getColorArr($color));
+        return $color;
+    }
+
+    public function getColorArr($c) {
+        if (Type::isTypes($c, ['array'])) {
+            return $this->_colorarr($c);
+        }
+
+        return [0, 0, 0, 0];
+    }
     
 	private function _colorarr($c) {
 		$default = [0, 0, 0, 0];

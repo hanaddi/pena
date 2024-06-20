@@ -162,7 +162,7 @@ class Table {
 			$cfontsize  = $coptions['fontsize'] ?? $fontsize;
 			$cminheight = $coptions['minheight'] ?? $minheight;
 
-            $cell = Pena::_getmultilinebox(
+            $cell = self::_getmultilinebox(
                 $this->image,
                 $offx,
                 0,
@@ -172,6 +172,7 @@ class Table {
                 $c['text'],
                 $coptions
             );
+            error_log(json_encode($cell, JSON_PRETTY_PRINT));
             
             $maxheight = max($maxheight, $cell['height'], $cminheight);
             $cells[] = $cell;
@@ -314,20 +315,80 @@ class Table {
         }
         $morey += $column['y'] + $conf['offsety'] + $config['y'];
         $morex = $config['x'] + $column['x'] + $conf['offsetx'];
-        
-        $column['y'] += $morey;
-        $column['x'] += $morex;
         foreach ($column['boxes'] as $k => $box) {
-            foreach ($column['boxes'][$k]['lines'] as $l => $lines) {
-                foreach ($column['boxes'][$k]['lines'][$l]['letterpool'] as $m => $letters) {
-                    $column['boxes'][$k]['lines'][$l]['letterpool'][$m]['y'] += $morey;
-                    $column['boxes'][$k]['lines'][$l]['letterpool'][$m]['x'] += $config['x'];
-                }
-                $column['boxes'][$k]['options']['bgcolor'] = [0, 0, 0, 127];
-            }
+            // $box->draw($morex, $morey);
+            $box->draw($config['x'] + $conf['offsetx'], $morey);
         }
-        $column['options']['bgcolor'] = [0, 0, 0, 127];
+        
+        // $column['y'] += $morey;
+        // $column['x'] += $morex;
+        // foreach ($column['boxes'] as $k => $box) {
+        //     foreach ($column['boxes'][$k]['lines'] as $l => $lines) {
+        //         foreach ($column['boxes'][$k]['lines'][$l]['letterpool'] as $m => $letters) {
+        //             $column['boxes'][$k]['lines'][$l]['letterpool'][$m]['y'] += $morey;
+        //             $column['boxes'][$k]['lines'][$l]['letterpool'][$m]['x'] += $config['x'];
+        //         }
+        //         $column['boxes'][$k]['options']['bgcolor'] = [0, 0, 0, 127];
+        //     }
+        // }
+        // $column['options']['bgcolor'] = [0, 0, 0, 127];
 
-        Pena::_drawmultilinebox($conf['image'], $column);
+        // Pena::_drawmultilinebox($conf['image'], $column);
     }
+
+    static function _getmultilinebox($im, $x, $y, $width, $font_size, $font, $text, $options=[]) {
+        $bbox = imagettfbbox($font_size, 0, $font, "WMH");
+        $text_height = $bbox[3] - $bbox[5];
+
+        $texts = explode("\n", $text);
+        $boxes = [];
+        $curry = $y;
+        $padding = $options['padding'] ?? 0;
+        $lspace = ($options['lspace'] ?? 1) + 0.5;
+
+        $rowoptions = $options;
+        $rowoptions['padding'] = 0;
+        unset($rowoptions['bgcolor']);
+        foreach ($texts as $text) {
+            $box = new Text($im, $text, [
+                'x'        => $x + $padding,
+                'y'        => $curry + $padding,
+                'width'    => $width - 2*$padding,
+                'fontsize' => $font_size,
+                'font'     => $font,
+                'align'    => $rowoptions['align'] ?? 'left',
+                'color'    => $rowoptions['color'] ?? [0, 0, 0, 0],
+
+                '_iscompact' => true,
+            ]);
+            $boxes[] = $box;
+            $curry += $box->height + $font_size*$lspace - $text_height;
+
+            // $box = Pena::_getinlinebox(
+            //     $im,
+            //     $x + $padding,
+            //     $curry + $padding,
+            //     $width - 2*$padding,
+            //     $font_size,
+            //     $font,
+            //     $text,
+            //     $rowoptions
+            // );
+            // $boxes[] = $box;
+            // $curry += $box['height'] + $font_size*$lspace - $text_height;
+        }
+        $height = $curry - $y + 2*$padding - $font_size*$lspace + $text_height;
+
+        return [
+            'height' => $height,
+            'boxes' => $boxes,
+            'options' => $options,
+            'font' => $font,
+            'font_size' => $font_size,
+            'x' => $x,
+            'y' => $y,
+            'width' => $width,
+        ];
+    }
+
 }

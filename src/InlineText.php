@@ -10,10 +10,11 @@ class InlineText extends Element {
         'fontsize' => 12,
         'x'        => 0,
         'y'        => 0,
+        'color'    => [0, 0, 0, 0],
 
     ];
     public $lineheight;
-    protected $area;
+    protected $area = null;
 
     public function __construct($canvas, $text, $config=[]) {
         parent::__construct($canvas, $config);
@@ -24,6 +25,20 @@ class InlineText extends Element {
 
     public function getArea() {
         return $this->area;
+    }
+
+    public function getSpaceOffset() {
+        if ($this->area === null) {
+            $this->area = $this->getBox();
+        }
+
+        $space_bbox = imagettfbbox($this->config['fontsize'], 0, $this->config['font'], ' ');
+        $space_width = $space_bbox[2] - $space_bbox[0];
+        $text1_bbox = imagettfbbox($this->config['fontsize'], 0, $this->config['font'], $this->text . ' ');
+        $text1_width = $text1_bbox[2] - $text1_bbox[0];
+
+        $est_width = $text1_width - $space_width;
+        return $est_width - $this->area['textwidth'];
     }
 
     public function getBox() {
@@ -51,7 +66,8 @@ class InlineText extends Element {
         $fontsize = $this->config['fontsize'];
         $text     = $this->text;
         
-        $color = imagecolorallocatealpha($canvas, 0,0,0,0);
+        $color = $this->getColor($canvas, $this->config['color']);
+        // $color = imagecolorallocatealpha($canvas, 0,0,0,0);
         imagefttext(
             $canvas, $fontsize, 0,
             $x, $y, $color, $font, $text

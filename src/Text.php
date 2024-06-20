@@ -10,17 +10,13 @@ class Text extends Element {
      * @var array<array<string>>
      */
     public $linetexts = [];
-    
-    /**
-     * @var array<array<InlineText>>
-     */
-    public $linetextsrendered = [];
 
     /**
      * @var array<InlineSentence>
      */
     public $sentences = [];
-
+    
+    public $height = 0;
     protected $config = [
         'font'      => __DIR__ . '/../assets/fonts/Roboto/Roboto-Regular.ttf',
         'fontsize'  => 12,
@@ -28,17 +24,20 @@ class Text extends Element {
         'x'         => 0,
         'y'         => 0,
         'width'     => 0,
+        'height'    => 0,
         'minheight' => 0,
         'align'     => 'left',
         'valign'    => 'top',
         'padding'   => 0,
+        'color'     => [0, 0, 0, 0],
+
+        '_iscompact' => false,
     ];
 
     public function __construct($canvas, $text, $config=[]) {
         parent::__construct($canvas, $config);
         $this->addText($text);
-        // $this->prepareSentence();
-        // $this->prepareUniformSentence();
+        $this->prepare();
     }
 
     public function addText($text) {
@@ -47,7 +46,6 @@ class Text extends Element {
             $words = explode(' ', $text);
             $line = [];
             foreach ($words as $word) {
-                // $line[] = new InlineText($this->canvas, $word, $this->config);
                 $line[] = $word;
             }
             $this->linetexts[] = $line;
@@ -56,6 +54,9 @@ class Text extends Element {
 
     private function prepareSentence() {
         $this->sentences = [];
+        $config = [
+            'color' => $this->config['color'],
+        ];
         foreach ($this->linetexts as $line) {
             if (count($line) === 0) {
                 continue;
@@ -65,7 +66,9 @@ class Text extends Element {
             $idx = 0;
             do {
                 $word = $prepend . $line[$idx];
-                if ($sentence->push(new InlineText($this->canvas, $word, $this->config))) {
+                $text = new InlineText($this->canvas, $word, $config);
+                if ($sentence->push($text, true)) {
+                    $sentence->push($text);
                     $prepend = ' ';
                     $idx++;
                     if (!isset($line[$idx])) {
@@ -124,19 +127,62 @@ class Text extends Element {
         if ($this->config['align'] === 'justify') {
             $this->prepareSentence();
         } else {
-            $this->prepareUniformSentence();
+            $this->prepareSentence();
+            // $this->prepareUniformSentence();
+        }
+
+        if ($this->config['_iscompact']) {
+            $this->_calcCompactHeight();
+        } else {
+            $this->_calcHeight();
         }
     }
 
-    public function draw() {
+    private function _calcHeight() {
+        $this->height = 0;
+        foreach ($this->sentences as $sentence) {
+            $this->height += $sentence->maxlineheight();
+        }
+        $this->height = max($this->height, $this->config['minheight']);
+        return $this->height;
+    }
+
+    private function _calcCompactHeight() {
+        $this->height = 0;
+        if (isset($this->sentences[0])) {
+            $this->height += $this->sentences[0]->maxascheight() - $this->sentences[0]->maxlineheight();
+        }
+        foreach ($this->sentences as $sentence) {
+            $this->height += $sentence->maxlineheight();
+        }
+        $this->height += $sentence->maxdescheight();
+        $this->height = max($this->height, $this->config['minheight']);
+        return $this->height;
+    }
+
+    public function draw($offsetx=0, $offsety=0) {
         $this->prepare();
 
-        $y = $this->config['y'];
+        $y = $this->config['y'] + $offsety;
+        
+        if ($this->config['_iscompact'] && isset($this->sentences[0])) {
+            $y += $this->sentences[0]->maxascheight() - $this->sentences[0]->maxlineheight();
+        }
+
         foreach ($this->sentences as $sentence) {
-            $x = $this->config['x'];
+            $x = $this->config['x'] + $offsetx;
             $sentence->draw($x, $y);
             $y += $sentence->maxlineheight();
         }
+
+        // imagerectangle(
+        //     $this->canvas,
+        //     $this->config['x'] + $offsetx,
+        //     $this->config['y'] + $offsety,
+        //     $this->config['x'] + $offsetx + $this->config['width'],
+        //     $this->config['y'] + $offsety + $this->height,
+        //     $this->getColor($this->canvas, [0, 220, 0, 0])
+        // );
     }
 
 }
